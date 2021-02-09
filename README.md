@@ -7,6 +7,13 @@
 <a href="https://packagist.org/packages/laravel/horizon"><img src="https://img.shields.io/packagist/l/laravel/horizon" alt="License"></a>
 </p>
 
+## About this fork
+
+As Horizon's users we noticed some missing nice-to-have features. This fork has been created to provide those features:
+ - Job scheduler
+ 
+**How to use:** You should fork this repository as we didn't publish it in Packagist, then include it in `composer.json`.
+
 ## Introduction
 
 Horizon provides a beautiful dashboard and code-driven configuration for your Laravel powered Redis queues. Horizon allows you to easily monitor key metrics of your queue system such as job throughput, runtime, and job failures.
