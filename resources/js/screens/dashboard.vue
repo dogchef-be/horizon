@@ -15,6 +15,9 @@
                 workers: [],
                 workload: [],
                 ready: false,
+                icons: {
+                    
+                }
             };
         },
 
@@ -278,7 +281,7 @@
                 </thead>
 
                 <tbody>
-                <tr v-for="queue in workload">
+                <tr v-for="(queue, index) in workload" :key="`queue_index_${index}`">
                     <td>
                         <span>{{ queue.name.replace(/,/g, ', ') }}</span>
                     </td>
@@ -315,7 +318,7 @@
                 </thead>
 
                 <tbody>
-                <tr v-for="supervisor in worker.supervisors">
+                <tr v-for="(supervisor, index) in worker.supervisors" :key="`supervisor_index_${index}`">
                     <td>{{ superVisorDisplayName(supervisor.name, worker.name) }}</td>
                     <td>{{ countProcesses(supervisor.processes) }}</td>
                     <td>{{ supervisor.options.queue.replace(/,/g, ', ') }}</td>

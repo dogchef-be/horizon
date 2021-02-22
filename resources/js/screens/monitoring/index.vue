@@ -132,7 +132,7 @@
                 </thead>
 
                 <tbody>
-                <tr v-for="tag in tags">
+                <tr v-for="(tag, index) in tags" :key="`tag_index_${index}`">
                     <td>
                         <router-link :to="{ name: 'monitoring-jobs', params: { tag:tag.tag }}" href="#">
                             {{ tag.tag }}
