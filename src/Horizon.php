@@ -6,6 +6,7 @@ use Closure;
 use Exception;
 use Illuminate\Support\Facades\File;
 use RuntimeException;
+use stdClass;
 
 class Horizon
 {
@@ -128,9 +129,10 @@ class Horizon
     {
         return [
             'path' => config('horizon.path'),
+            'scheduler' => base_path('scheduler.json'),
+            'controllers' => self::getControllersTree(base_path('app/Http/Controllers/Jobs'))
         ];
     }
-
     /**
      * Specify the email address to which email notifications should be routed.
      *
@@ -187,6 +189,83 @@ class Horizon
             throw new RuntimeException('Horizon assets are not published. Please run: php artisan horizon:publish');
         }
 
-        return File::get($publishedPath) === File::get(__DIR__.'/../public/mix-manifest.json');
+        return File::get($publishedPath) === File::get(__DIR__ . '/../public/mix-manifest.json');
+    }
+        
+    /**
+     * Get all dire
+     *
+     * @param  mixed $path
+     * @param  mixed $replace
+     * @param  mixed $root
+     * @return stdClass
+     */
+    private static function getControllersTree($path) {
+        $folders = glob("{$path}/*", GLOB_ONLYDIR);
+
+        if ($folders === false || count($folders) === 0) {
+            return null;
+        }
+
+        $result  = new stdClass();
+
+        foreach ($folders as $folder) {
+            $current = substr($folder, strlen("{$path}/"));
+            
+            $aux = self::getPHPFiles($folder);
+
+            if (isset($aux)) {
+                $result->{$current} = $aux;
+            }
+        }
+
+        return $result;
+    }
+
+    private static function getPHPFiles($path) {
+        $files = glob("{$path}/*.php");
+
+        if ($files === false || count($files) === 0) {
+            return null;
+        }
+
+        $result = new stdClass();
+
+        foreach ($files as $file) {
+            $current = substr(substr($file, strlen("{$path}/")), 0, -4);
+            $methods = self::getPHPFileMethods($file);
+
+            if (count($methods) > 0) {
+                $result->{$current} = new stdClass();
+                $result->{$current}->jobs = $methods;
+                $result->{$current}->namespace = substr(preg_replace('/.*\/app/', 'App', $file), 0, -4);
+            }
+        }
+
+        return $result;
+    }
+
+    private static function getPHPFileMethods($path, $sort = true) {
+        $file = file($path);
+
+        $result = [];
+
+        foreach ($file as $line) {
+            $line = trim($line);
+
+            if (stripos($line, 'function ') !== false) {
+                $function_name = trim(str_ireplace(['public', 'private', 'protected', 'static'], '', $line));
+
+                $function_name = trim(substr($function_name, 9, strpos($function_name, '(') - 9));
+
+                if (!in_array($function_name, ['__construct', '__destruct', '__get', '__set', '__isset', '__unset'])) {
+                    $result[] = $function_name;
+                }
+            }
+        }
+        
+        asort($result);
+        
+        return array_values($result);
     }
 }

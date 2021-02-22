@@ -10,6 +10,7 @@
     <title>Horizon{{ config('app.name') ? ' - ' . config('app.name') : '' }}</title>
 
     <!-- Style sheets-->
+    <link href="https://cdn.materialdesignicons.com/5.4.55/css/materialdesignicons.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
     <link href="{{ asset(mix($cssFile, 'vendor/horizon')) }}" rel="stylesheet">
 </head>
@@ -42,9 +43,19 @@
             <div class="col-2 sidebar">
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <router-link active-class="active" to="/dashboard" class="nav-link d-flex align-items-center pt-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                <path d="M0 3c0-1.1.9-2 2-2h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3zm2 2v12h16V5H2zm8 3l4 5H6l4-5z"></path>
+                        <router-link active-class="active" to="/scheduler" class="nav-link d-flex align-items-center pt-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                                <path d="M14 0H2a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zM1 3.857C1 3.384 1.448 3 2 3h12c.552 0 1 .384 1 .857v10.286c0 .473-.448.857-1 .857H2c-.552 0-1-.384-1-.857V3.857z"/>
+                                <path d="M7 10a1 1 0 0 0 0-2H1v2h6zm2-3h6V5H9a1 1 0 0 0 0 2z"/>
+                            </svg>
+                            <span>Scheduler</span>
+                        </router-link>
+                    </li>
+                    <li class="nav-item">
+                        <router-link active-class="active" to="/dashboard" class="nav-link d-flex align-items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M2 13.5V7h1v6.5a.5.5 0 0 0 .5.5h9a.5.5 0 0 0 .5-.5V7h1v6.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 13.5zm11-11V6l-2-2V2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5z"/>
+                                <path fill-rule="evenodd" d="M7.293 1.5a1 1 0 0 1 1.414 0l6.647 6.646a.5.5 0 0 1-.708.708L8 2.207 1.354 8.854a.5.5 0 1 1-.708-.708L7.293 1.5z"/>
                             </svg>
                             <span>Dashboard</span>
                         </router-link>
@@ -121,7 +132,8 @@
 
 <!-- Global Horizon Object -->
 <script>
-    window.Horizon = @json($horizonScriptVariables);
+    window.Horizon = <?php echo json_encode($horizonScriptVariables); ?>;
+    // window.Horizon = @json($horizonScriptVariables);
 </script>
 
 <script src="{{asset(mix('app.js', 'vendor/horizon'))}}"></script>

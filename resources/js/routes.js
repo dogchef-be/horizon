@@ -1,5 +1,10 @@
 export default [
     { path: '/', redirect: '/dashboard' },
+    {
+        path: '/scheduler',
+        name: 'scheduler',
+        component: require('./screens/scheduler').default,
+    },
 
     {
         path: '/dashboard',
