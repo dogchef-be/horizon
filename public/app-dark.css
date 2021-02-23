@@ -11145,6 +11145,10 @@ button:hover .fill-primary {
   fill: #adadff;
 }
 
+.info-icon {
+  fill: #ccd2df;
+}
+
 .paginator .btn {
   text-decoration: none;
   color: #9ea7ac;

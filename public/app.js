@@ -3851,6 +3851,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     document.title = "Horizon - Scheduler";
   },
   methods: {
+    deleteJobSchedule: function deleteJobSchedule() {},
     handleSave: function handleSave(schedule) {
       var _this2 = this;
 
@@ -81281,13 +81282,7 @@ var render = function() {
                   _vm._v("MAX WAIT TIME")
                 ]),
                 _vm._v(" "),
-                _vm.stats.max_wait_queue
-                  ? _c("small", [
-                      _vm._v("(" + _vm._s(_vm.stats.max_wait_queue) + ")")
-                    ])
-                  : _vm._e(),
-                _vm._v(" "),
-                _c("h4", { staticClass: "mt-4" }, [
+                _c("h4", { staticClass: "mt-4 mb-0" }, [
                   _vm._v(
                     "\n                            " +
                       _vm._s(
@@ -81297,7 +81292,13 @@ var render = function() {
                       ) +
                       "\n                        "
                   )
-                ])
+                ]),
+                _vm._v(" "),
+                _vm.stats.max_wait_queue
+                  ? _c("small", { staticClass: "mt-1" }, [
+                      _vm._v("(" + _vm._s(_vm.stats.max_wait_queue) + ")")
+                    ])
+                  : _vm._e()
               ])
             ]),
             _vm._v(" "),
@@ -81354,31 +81355,106 @@ var render = function() {
               _c(
                 "tbody",
                 _vm._l(_vm.workload, function(queue, index) {
-                  return _c("tr", { key: "queue_index_" + index }, [
-                    _c("td", [
-                      _c("span", [
-                        _vm._v(_vm._s(queue.name.replace(/,/g, ", ")))
-                      ])
-                    ]),
-                    _vm._v(" "),
-                    _c("td", [
-                      _vm._v(
-                        _vm._s(
-                          queue.processes ? queue.processes.toLocaleString() : 0
+                  return _c(
+                    "div",
+                    { key: "queue_i_" + index },
+                    [
+                      _c("tr", [
+                        _c(
+                          "td",
+                          { class: { "font-weight-bold": queue.split_queues } },
+                          [
+                            _c("span", [
+                              _vm._v(_vm._s(queue.name.replace(/,/g, ", ")))
+                            ])
+                          ]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "td",
+                          { class: { "font-weight-bold": queue.split_queues } },
+                          [
+                            _vm._v(
+                              _vm._s(
+                                queue.processes
+                                  ? queue.processes.toLocaleString()
+                                  : 0
+                              )
+                            )
+                          ]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "td",
+                          { class: { "font-weight-bold": queue.split_queues } },
+                          [
+                            _vm._v(
+                              _vm._s(
+                                queue.length ? queue.length.toLocaleString() : 0
+                              )
+                            )
+                          ]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "td",
+                          {
+                            staticClass: "text-right",
+                            class: { "font-weight-bold": queue.split_queues }
+                          },
+                          [_vm._v(_vm._s(_vm.humanTime(queue.wait)))]
                         )
-                      )
-                    ]),
-                    _vm._v(" "),
-                    _c("td", [
-                      _vm._v(
-                        _vm._s(queue.length ? queue.length.toLocaleString() : 0)
-                      )
-                    ]),
-                    _vm._v(" "),
-                    _c("td", { staticClass: "text-right" }, [
-                      _vm._v(_vm._s(_vm.humanTime(queue.wait)))
-                    ])
-                  ])
+                      ]),
+                      _vm._v(" "),
+                      _vm._l(queue.split_queues, function(split_queue, index) {
+                        return _c("tr", { key: "split_queue_i_" + index }, [
+                          _c("td", [
+                            _c(
+                              "svg",
+                              {
+                                staticClass: "icon info-icon",
+                                attrs: {
+                                  xmlns: "http://www.w3.org/2000/svg",
+                                  viewBox: "0 0 20 20"
+                                }
+                              },
+                              [
+                                _c("path", {
+                                  attrs: {
+                                    d:
+                                      "M12.95 10.707l.707-.707L8 4.343 6.586 5.757 10.828 10l-4.242 4.243L8 15.657l4.95-4.95z"
+                                  }
+                                })
+                              ]
+                            ),
+                            _vm._v(" "),
+                            _c("span", [
+                              _vm._v(
+                                _vm._s(split_queue.name.replace(/,/g, ", "))
+                              )
+                            ])
+                          ]),
+                          _vm._v(" "),
+                          _c("td", [_vm._v("-")]),
+                          _vm._v(" "),
+                          _c("td", [
+                            _vm._v(
+                              _vm._s(
+                                split_queue.length
+                                  ? split_queue.length.toLocaleString()
+                                  : 0
+                              )
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c("td", { staticClass: "text-right" }, [
+                            _vm._v(_vm._s(_vm.humanTime(split_queue.wait)))
+                          ])
+                        ])
+                      })
+                    ],
+                    2
+                  )
                 }),
                 0
               )
@@ -84245,7 +84321,7 @@ var render = function() {
       }
     },
     [
-      _c("div", { staticClass: "modal-dialog modal-xl" }, [
+      _c("div", { staticClass: "modal-dialog modal-lg" }, [
         _c("div", { staticClass: "modal-content" }, [
           _c("div", { staticClass: "modal-header" }, [
             _c(
@@ -84254,7 +84330,7 @@ var render = function() {
                 staticClass: "modal-title",
                 attrs: { id: "exampleModalLabel" }
               },
-              [_vm._v("Modal Schedule")]
+              [_vm._v("Job Scheduler Editor")]
             ),
             _vm._v(" "),
             _c(
@@ -84570,7 +84646,29 @@ var render = function() {
                   }
                 }
               },
-              [_vm._v("+")]
+              [
+                _c(
+                  "svg",
+                  {
+                    staticClass: "bi bi-gear-fill",
+                    attrs: {
+                      xmlns: "http://www.w3.org/2000/svg",
+                      width: "16",
+                      height: "16",
+                      fill: "currentColor",
+                      viewBox: "0 0 16 16"
+                    }
+                  },
+                  [
+                    _c("path", {
+                      attrs: {
+                        d:
+                          "M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"
+                      }
+                    })
+                  ]
+                )
+              ]
             )
           ]
         ),
@@ -84660,7 +84758,7 @@ var render = function() {
                                 "ul",
                                 { staticClass: "list-group" },
                                 _vm._l(_vm.scheduler[key][catkey], function(
-                                  subCategory,
+                                  cron,
                                   subkey,
                                   subIndex
                                 ) {
@@ -84676,8 +84774,49 @@ var render = function() {
                                           _vm._v(_vm._s(subkey))
                                         ]),
                                         _vm._v(" "),
-                                        _c("div", { staticClass: "col-6" }, [
-                                          _vm._v(_vm._s(subCategory))
+                                        _c("div", { staticClass: "col-5" }, [
+                                          _vm._v(_vm._s(cron))
+                                        ]),
+                                        _vm._v(" "),
+                                        _c("div", { staticClass: "col-1" }, [
+                                          _c(
+                                            "button",
+                                            {
+                                              staticClass: "btn btn-danger",
+                                              attrs: { type: "button" },
+                                              on: {
+                                                click: function($event) {
+                                                  return _vm.deleteJobSchedule(
+                                                    _vm.$cat
+                                                  )
+                                                }
+                                              }
+                                            },
+                                            [
+                                              _c(
+                                                "svg",
+                                                {
+                                                  staticClass: "bi bi-x",
+                                                  attrs: {
+                                                    xmlns:
+                                                      "http://www.w3.org/2000/svg",
+                                                    width: "16",
+                                                    height: "16",
+                                                    fill: "currentColor",
+                                                    viewBox: "0 0 16 16"
+                                                  }
+                                                },
+                                                [
+                                                  _c("path", {
+                                                    attrs: {
+                                                      d:
+                                                        "M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"
+                                                    }
+                                                  })
+                                                ]
+                                              )
+                                            ]
+                                          )
                                         ])
                                       ])
                                     ]

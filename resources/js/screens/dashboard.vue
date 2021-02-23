@@ -282,7 +282,7 @@
                 </thead>
 
                 <tbody>
-                    <template v-for="(queue, index) in workload" :key="`queue_i_${index}`">
+                    <div v-for="(queue, index) in workload" :key="`queue_i_${index}`">
                         <tr>
                             <td :class="{'font-weight-bold': queue.split_queues}">
                                 <span>{{ queue.name.replace(/,/g, ', ') }}</span>
@@ -304,7 +304,7 @@
                             <td>{{ split_queue.length ? split_queue.length.toLocaleString() : 0 }}</td>
                             <td class="text-right">{{ humanTime(split_queue.wait) }}</td>
                         </tr>
-                    </template>
+                    </div>
                 </tbody>
             </table>
         </div>

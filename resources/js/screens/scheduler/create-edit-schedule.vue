@@ -44,10 +44,10 @@
 </script>
 <template>
     <div class="modal fade w-100" id="createEditSchedule" tabindex="-1" data-backdrop="static" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Modal Schedule</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Job Scheduler Editor</h5>
                 <button type="button" class="close" @click="$emit('close')">
                 <span aria-hidden="true">&times;</span>
                 </button>
