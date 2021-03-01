@@ -38,6 +38,10 @@ Route::prefix('api')->group(function () {
     Route::get('/jobs/failed/{id}', 'FailedJobsController@show')->name('horizon.failed-jobs.show');
     Route::post('/jobs/retry/{id}', 'RetryController@store')->name('horizon.retry-jobs.show');
     Route::get('/jobs/{id}', 'JobsController@show')->name('horizon.jobs.show');
+
+    // Scheduler file 
+    Route::get('/scheduler', 'SchedulerFileController@index')->name('horizon.scheduler.index');
+    Route::post('/scheduler', 'SchedulerFileController@store')->name('horizon.scheduler.store');
 });
 
 // Catch-all Route...

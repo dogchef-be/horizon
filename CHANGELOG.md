@@ -1,6 +1,24 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/horizon/compare/v5.6.4...master)
+## [Unreleased](https://github.com/laravel/horizon/compare/v5.7.0...5.x)
+
+
+## [v5.7.0 (2021-02-16)](https://github.com/laravel/horizon/compare/v5.6.6...v5.7.0)
+
+### Added
+- Show workload also per queue when balancing is disabled ([#966](https://github.com/laravel/horizon/pull/966), [b4e8c6a](https://github.com/laravel/horizon/commit/b4e8c6a460d34efe2843c0d943c0cdea20fb0bba))
+
+
+## [v5.6.6 (2021-02-09)](https://github.com/laravel/horizon/compare/v5.6.5...v5.6.6)
+
+### Fixed
+- Add fallback font ([#964](https://github.com/laravel/horizon/pull/964))
+
+
+## [v5.6.5 (2021-01-12)](https://github.com/laravel/horizon/compare/v5.6.4...v5.6.5)
+
+### Fixed
+- Bump minimum Laravel version ([#954](https://github.com/laravel/horizon/pull/954))
 
 
 ## [v5.6.4 (2021-01-05)](https://github.com/laravel/horizon/compare/v5.6.3...v5.6.4)
