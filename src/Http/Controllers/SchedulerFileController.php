@@ -17,7 +17,7 @@ class SchedulerFileController extends Controller
      */
     public function index()
     {
-        if (! Storage::disk('local')->exists($this->schedulerFile)) {
+        if (!Storage::disk('local')->exists($this->schedulerFile)) {
             return response(null, 200);
         }
 
@@ -33,8 +33,8 @@ class SchedulerFileController extends Controller
      */
     public function store(Request $request)
     {
-        $scheduler = $request->input('scheduler');
-        $isFileUpdated = Storage::disk('local')->put($this->schedulerFile, json_encode($scheduler));
+        $scheduler = json_encode($request->input('scheduler'), JSON_PRETTY_PRINT);
+        $isFileUpdated = Storage::disk('local')->put($this->schedulerFile, $scheduler);
 
         if (!$isFileUpdated) {
             return response('Can\'t write to file', 500);
