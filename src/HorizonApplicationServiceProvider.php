@@ -27,8 +27,9 @@ class HorizonApplicationServiceProvider extends ServiceProvider
         $this->gate();
 
         Horizon::auth(function ($request) {
-            return app()->environment('local') ||
-                   Gate::check('viewHorizon', [$request->user()]);
+            /*return app()->environment('local') ||
+                   Gate::check('viewHorizon', [$request->user()]);*/
+            return true;
         });
     }
 
@@ -55,6 +56,8 @@ class HorizonApplicationServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        if (app()->environment('local')) {
+            $this->app->register(\Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class);
+        }
     }
 }
