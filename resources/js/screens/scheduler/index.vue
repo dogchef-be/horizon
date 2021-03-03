@@ -1,134 +1,201 @@
 <script>
     import CreateEditSchedule from './create-edit-schedule';
+    import DeleteSchedule from './delete-schedule';
+    import CustomSelect from './custom-select';
 
     export default {
         components: {
-            CreateEditSchedule
+            CreateEditSchedule,
+            DeleteSchedule,
+            CustomSelect
         },
         data() {
             return {
-                scheduler: null,
+                scheduler: [],
+                selectedProject: null,
+                selectedCategory: null,
+                selectedSchedule: null,
                 showEditCreate: false,
+                showDelete: false,
             };
+        },
+        computed: {
+            projects() {
+                if (this.scheduler.length === 0) {
+                    return [];
+                }
+
+                return [...new Set(this.scheduler.map(item => item.project))];
+            },
+            categories() {
+                if (this.selectedProject === null) {
+                    return [];
+                }
+
+                const project = this.scheduler.filter(item => item.project === this.selectedProject);
+
+                return [...new Set(project.map(item => item.category))];
+            },
+            jobs() {
+                if (this.selectedProject === null || this.selectedCategory === null) {
+                    return [];
+                }
+
+                return this.scheduler.filter(item => item.project === this.selectedProject && item.category === this.selectedCategory);
+            }
+        },
+        
+        watch: {
+            project() {
+                this.selectedJob = null;
+                this.selectedCategory = null;
+            }
         },
         created() {
             this.$http.get(Horizon.basePath + '/api/scheduler')
-                .then(response => {
-                    const data = response.data === '' ? null : response.data;
-                    
-                    if (data) {
-                        this.scheduler = response.data;
-                    }
-                });
+                .then(response => this.parseScheduler(response.data));
         },
         mounted() {
             document.title = "Horizon - Scheduler";
+
+            $('#exampleModal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget) // Button that triggered the modal
+                var recipient = button.data('whatever') // Extract info from data-* attributes
+                // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+                // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+                var modal = $(this)
+                modal.find('.modal-title').text('New message to ' + recipient)
+                modal.find('.modal-body input').val(recipient)
+            });
         },
         methods: {
             deleteJobSchedule() {
+                this.scheduler = this.scheduler.filter(schedule => schedule.project !== selectedProject &&
+                    schedule.category !== selectedCategory && schedule.job !== selectedJob);
 
+                this.postScheduler();
             },
             handleSave(schedule) {
-                this.showEditCreate = false;
+                this.scheduler.push(schedule);
+                this.selectedProject = schedule.project;
+                this.selectedCategory = schedule.category;    
+                this.saveScheduler();
+            },
+            showEditCreateModal(show = true) {
+                this.showEditCreate = show;
+            },
+            handleCreate() {
+                this.selectedSchedule = null;
+                this.showEditCreateModal();
+            },
+            handleEdit(job, frequency) {
+                this.selectedSchedule = {
+                    project: this.selectedProject,
+                    category: this.selectedCategory,
+                    frequency,
+                    job
+                };
 
-                if (!this.scheduler) {
-                    this.scheduler = {};
+                this.showEditCreateModal();
+            },
+            handleDelete(job, frequency) {
+                this.selectedSchedule = {
+                    project: this.selectedProject,
+                    category: this.selectedCategory,
+                    frequency,
+                    job
                 }
 
-                if (!this.scheduler[schedule.project]) {
-                    this.scheduler[schedule.project] = {};
-                }
+                this.showDelete = true;
+            },
+            saveScheduler(scheduler = this.scheduler) {
+                this.showEditCreateModal(false);
+                this.showDelete = false;
 
-
-                if (!this.scheduler[schedule.project][schedule.category]) {
-                    this.scheduler[schedule.project][schedule.category] = {};
-                }
-
-                this.scheduler[schedule.project][schedule.category] = {
-                    ...this.scheduler[schedule.project][schedule.category],
-                    [schedule.job]: schedule.frequency
-                }
-                
-
-                this.$http.post(Horizon.basePath + '/api/scheduler', { 'scheduler': this.scheduler })
-                    .then(response => {
-                        const data = response.data === '' ? null : response.data;
-
-                        if (data) {
-                            this.scheduler = response.data;
-                        }
-                    })
+                this.$http.post(Horizon.basePath + '/api/scheduler', { scheduler })
+                    .then(response => this.parseScheduler(response.data));
+            },
+            parseScheduler(scheduler) {
+                this.scheduler = scheduler === '' ? [] : scheduler;
             }
         }
     }
 </script>
 <template>
     <div>
-        <CreateEditSchedule :show="showEditCreate" @close="showEditCreate = false" @save="handleSave($event)" />
+        <CreateEditSchedule :show="showEditCreate" :schedule="selectedSchedule" @close="showEditCreate = false" @save="handleSave($event)" />
+        <DeleteSchedule :show="showDelete" :scheduler="scheduler" :schedule="selectedSchedule" @close="showDelete = false" @save="saveScheduler($event)" />
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h5>Scheduler</h5>
                 
-                <button type="button" class="btn btn-primary" @click="showEditCreate = true">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear-fill" viewBox="0 0 16 16">
-                        <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
-                    </svg>
+                <button type="button" class="btn btn-primary" @click="handleCreate()">
+                    <i class="bi bi-plus-circle"></i>
                 </button>
             </div>
-            <div v-if="scheduler === null" class="d-flex flex-column align-items-center justify-content-center card-bg-secondary p-5 bottom-radius">
+            <div v-if="scheduler.length === 0" class="d-flex flex-column align-items-center justify-content-center card-bg-secondary p-5 bottom-radius">
                 <span>There aren't any schedule.</span>
             </div>
             <div v-else class="card-body">
-                <div v-for="(schedule, key, index) in scheduler" :key="`schedule_index_${index}`">
-                    <button 
-                        class="btn btn-link btn-block text-left my-2"
-                        type="button"
-                        data-toggle="collapse" 
-                        aria-expanded="true"
-                        :data-target="`#collapse${key}`"
-                        :aria-controls="`collapse${key}`"
-                    >
-                        {{ key }}
-                    </button>
-                    <div :id="`collapse${key}`" class="collapse show">
-                        <div 
-                            v-for="(category, catkey, catIndex) in scheduler[key]" :key="`category_index_${catIndex}`" 
-                            class="row px-4"
+                <div class="row">
+                    <div class="col-6">
+                        <CustomSelect
+                            v-model="selectedProject"
+                            :disabled="projects.length === 0"
+                            :options="projects"
+                            label="Project"
+                        />
+                    </div>
+                    <div class="col-6">
+                        <CustomSelect
+                            v-model="selectedCategory"
+                            :disabled="categories.length === 0"
+                            :options="categories"
+                            label="Category"
+                        />
+                    </div>
+                    <div class="col-12 pt-3" v-if="jobs.length > 0">
+                        <label for="jobs-list">Jobs</label>
+                        <ul
+                            id="jobs-list"
+                            class="list-group"
                         >
-                            <button 
-                                class="btn btn-link btn-block text-left"
-                                type="button"
-                                data-toggle="collapse" 
-                                aria-expanded="true"
-                                :data-target="`#collapse${key}${catkey}`"
-                                :aria-controls="`collapse${key}${catkey}`"
+                            <li
+                                v-for="({ job, frequency }, index) in jobs"
+                                :key="`cron_index_${index}`"
+                                class="list-group-item py-1"
                             >
-                                {{ catkey }}
-                            </button>
-                            <div :id="`collapse${key}${catkey}`" class="collapse show w-100 my-1">
-                                <ul class="list-group">
-                                    <li
-                                        v-for="(cron, subkey, subIndex) in scheduler[key][catkey]" :key="`subcategory_index_${subIndex}`"
-                                        class="list-group-item"
-                                    >
-                                        <div class="row px-6">
-                                            <div class="col-6">{{ subkey }}</div>
-                                            <div class="col-5">{{ cron }}</div>
-                                            <div class="col-1">
-                                                <button type="button" class="btn btn-danger" @click="deleteJobSchedule($cat)">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
-                                                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
+                                <div class="row">
+                                    <div class="col-5 d-flex align-items-center">{{ job }}</div>
+                                    <div class="col-5 d-flex align-items-center">{{ frequency }}</div>
+                                    <div class="col-2 d-flex justify-content-end">
+                                        <button type="button" class="btn btn-secondary btn-sm mr-1" @click="handleEdit(job, frequency)">
+                                            <i class="bi bi-pencil-fill"></i>
+                                        </button>
+                                        <button
+                                            class="btn btn-danger btn-sm"
+                                            data-target="#exampleModal"
+                                            data-toggle="modal"
+                                            type="button"
+                                            @click="handleDelete(job, frequency)"
+                                        >
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </template>
+<style lang="scss" scoped>
+.link {
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  cursor: pointer;
+}
+</style>
