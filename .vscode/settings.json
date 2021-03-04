@@ -1,0 +1,12 @@
+{
+  // PHP CS Fixer
+  "[php]": {
+    "editor.defaultFormatter": "junstyle.php-cs-fixer",
+  },
+  "php-cs-fixer.executablePath": "${workspaceFolder}/vendor/bin/php-cs-fixer",
+  "php-cs-fixer.config": "${workspaceFolder}/.php_cs.php",
+  "php-cs-fixer.onsave": true,
+  "i18n-ally.localesPaths": [
+    "resources/lang"
+  ]
+}
