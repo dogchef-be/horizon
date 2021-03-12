@@ -132,7 +132,7 @@ class Horizon
         return [
             'path' => config('horizon.path'),
             'scheduler' => base_path('scheduler.json'),
-            'controllers' => self::getControllersTree(base_path('app/Http/Controllers/Jobs'))
+            'jobsForScheduling' => self::getPhpFilesTree(base_path('app/JobScheduler'))
         ];
     }
     /**
@@ -195,14 +195,12 @@ class Horizon
     }
         
     /**
-     * Get all dire
+     * Get a tree of php files.
      *
      * @param  mixed $path
-     * @param  mixed $replace
-     * @param  mixed $root
      * @return stdClass
      */
-    private static function getControllersTree($path) {
+    private static function getPhpFilesTree($path) {
         $folders = glob("{$path}/*", GLOB_ONLYDIR);
 
         if ($folders === false || count($folders) === 0) {
@@ -247,7 +245,7 @@ class Horizon
         return $result;
     }
 
-    private static function getPHPFileMethods($path, $sort = true) {
+    private static function getPHPFileMethods($path) {
         $file = file($path);
 
         $result = [];

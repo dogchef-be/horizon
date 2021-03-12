@@ -23,7 +23,7 @@
         },
         data () {
             return {
-                projects: JSON.parse(JSON.stringify(Horizon.controllers)),
+                projects: JSON.parse(JSON.stringify(Horizon.jobsForScheduling)),
                 current: {
                     category: null,
                     project: null,
