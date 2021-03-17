@@ -10,51 +10,78 @@
         name: 'CreateEditSchedule',
         props: {
             show: Boolean,
-            schedule: {
+            selected: {
                 type: Object,
-                default: null
+                required: true
+            },
+            scheduler: {
+                type: Array,
+                default: () => []
             }
         },
         watch: {
             show(value) {
-                this.current = this.getCurrentValues();
+                this.schedule = value ? this.getSelectedValues() : null;
                 $('#createEditSchedule').modal(value ? 'show' : 'hide');
             }
         },
         data () {
             return {
-                projects: JSON.parse(JSON.stringify(Horizon.jobsForScheduling)),
-                current: {
-                    category: null,
-                    project: null,
-                    job: null,
-                    frequency: '*\/1 * * * *',
-                }
+                projects: JSON.parse(JSON.stringify(Horizon.methodsForScheduling)),
+                schedule: null
             };
         },
         computed: {
-            jobs() {
-                const { project, category } = this.current;
-
+            methods() {
+                const { project, category } = this.schedule;
+                
                 if (project === null || category === null) {
                     return [];
                 }
-
-                return this.projects[project][category].jobs;
+                
+                return this.projects[project][category].methods;
             }
         },
         methods: {
-            getCurrentValues() {
-                if (this.schedule !== null) {
-                    return { ...this.schedule };
+            getSelectedValues() {
+                const hasValues = Object.values(this.selected).some(value => value !== null);
+
+                if (hasValues) {
+                    return { ...this.selected };
                 }
 
                 return {
                     frequency: '*\/1 * * * *',
                     category: null,
                     project: null,
-                    job: null,
+                    method: null,
                 }
+            },
+            handleSeletecMethod() {
+                const { project, category, method } = this.schedule;
+
+                if (method !== null) {
+                    const jobs = this.scheduler.filter(schedule => (
+                        schedule.category === category &&
+                        schedule.project === project && 
+                        schedule.method === method
+                    ));
+
+                    if (jobs.length > 0) {
+                        this.schedule.frequency = jobs[0].frequency;
+                    }
+                }
+            },
+            saveSchedule() {
+                const { project, category, method } = this.schedule;
+
+                const scheduler = this.scheduler.filter(schedule => (
+                    schedule.project !== project || schedule.category !== category || schedule.method !== method
+                ));
+                
+                scheduler.push(this.schedule);
+
+                this.$emit('save', scheduler);
             }
         }
     }
@@ -73,7 +100,7 @@
                     <div class="row pb-3">
                         <div class="col-6">
                             <CustomSelect
-                                v-model="current.project"
+                                v-model="schedule.project"
                                 :disabled="projects === null"
                                 :options="projects"
                                 label="Project"
@@ -81,9 +108,9 @@
                         </div>
                         <div class="col-6">
                             <CustomSelect
-                                v-model="current.category"
-                                :disabled="current.project === null"
-                                :options="projects[current.project]"
+                                v-model="schedule.category"
+                                :disabled="schedule.project === null"
+                                :options="projects[schedule.project]"
                                 label="Category"
                             />
                         </div>
@@ -91,30 +118,43 @@
                     <div class="row pb-3">
                         <div class="col">
                             <CustomSelect
-                                v-model="current.job"
-                                :disabled="jobs.length === 0"
-                                :options="jobs"
-                                label="Job"
+                                v-model="schedule.method"
+                                :disabled="methods.length === 0"
+                                :options="methods"
+                                label="Method"
+                                @input="handleSeletecMethod()"
                             />
                         </div>
                     </div>
                     <div
-                        v-if="current.job"
+                        v-if="schedule.method"
                         class="row pb-3"
                     >   
                         <div class="col">
                             <label for="cronEditor">Frequency</label>            
                             <VueCronEditorBuefy
                                 id="cronEditor"
-                                v-model="current.frequency"
+                                v-model="schedule.frequency"
                                 class="w-100"
+                                preserveStateOnSwitchToAdvanced
                             />
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @click="$emit('close')">Close</button>
-                    <button type="button" class="btn btn-primary" :disabled="!current.frequency" @click="$emit('save', current)">Save changes</button>
+                    <button
+                        class="btn btn-secondary"
+                        type="button"
+                        @click="$emit('close')"
+                    >
+                        <span>Close</span>
+                    </button>
+                    <button
+                        :disabled="schedule.frequency === null"
+                        class="btn btn-primary"
+                        type="button"
+                        @click="saveSchedule()"
+                    >Save</button>
                 </div>
             </div>
         </div>

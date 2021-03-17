@@ -7,9 +7,9 @@
                 type: Array,
                 default: () => []
             },
-            schedule: {
+            selected: {
                 type: Object,
-                default: null
+                required: true
             }
         },
         watch: {
@@ -19,8 +19,12 @@
         },
         methods: {
             deleteSchedule() {
-                const scheduler = this.scheduler.filter(schedule => schedule.project !== this.schedule.project &&
-                    schedule.category !== this.schedule.category && schedule.job !== this.schedule.job);
+                const { project, category, frequency, method } = this.selected;
+
+                const scheduler = this.scheduler.filter(schedule => (
+                    schedule.project !== project || schedule.category !== category ||
+                    schedule.frequency !== frequency || schedule.method !== method
+                ));
 
                 this.$emit('save', scheduler);
             }
@@ -32,17 +36,30 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content" v-if="show">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">{{ schedule.project }} / {{ schedule.category }} / {{ schedule.job }}</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Do you really want to delete this schedule?</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <span>Do you really want to delete this job?</span>
+                    <span>{{ selected.project }} / {{ selected.category }} / {{ selected.method }}</span>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="$emit('close')">Close</button>
-                    <button type="button" class="btn btn-danger" @click="deleteSchedule()">Delete</button>
+                    <button 
+                        class="btn btn-secondary"
+                        data-dismiss="modal"
+                        type="button"
+                        @click="$emit('close')"
+                    >
+                        <span>Close</span>
+                    </button>
+                    <button
+                        class="btn btn-danger"
+                        type="button"
+                        @click="deleteSchedule()"
+                    >
+                        <span>Delete</span>
+                    </button>
                 </div>
             </div>
         </div>

@@ -132,7 +132,7 @@ class Horizon
         return [
             'path' => config('horizon.path'),
             'scheduler' => base_path('scheduler.json'),
-            'jobsForScheduling' => self::getPhpFilesTree(base_path('app/JobScheduler'))
+            'methodsForScheduling' => self::getPhpFilesTree(base_path('app/JobScheduler'))
         ];
     }
     /**
@@ -237,7 +237,7 @@ class Horizon
 
             if (count($methods) > 0) {
                 $result->{$current} = new stdClass();
-                $result->{$current}->jobs = $methods;
+                $result->{$current}->methods = $methods;
                 $result->{$current}->namespace = substr(preg_replace('/.*\/app/', 'App', $file), 0, -4);
             }
         }
