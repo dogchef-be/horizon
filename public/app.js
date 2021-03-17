@@ -3757,6 +3757,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   data: function data() {
     return {
       projects: JSON.parse(JSON.stringify(Horizon.methodsForScheduling)),
+      defaultFrequency: '*\/1 * * * *',
       schedule: null
     };
   },
@@ -3784,38 +3785,50 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       }
 
       return {
-        frequency: '*\/1 * * * *',
+        frequency: this.defaultFrequency,
         category: null,
         project: null,
         method: null
       };
     },
-    handleSeletecMethod: function handleSeletecMethod() {
+    saveSchedule: function saveSchedule() {
       var _this$schedule2 = this.schedule,
           project = _this$schedule2.project,
           category = _this$schedule2.category,
           method = _this$schedule2.method;
-
-      if (method !== null) {
-        var jobs = this.scheduler.filter(function (schedule) {
-          return schedule.category === category && schedule.project === project && schedule.method === method;
-        });
-
-        if (jobs.length > 0) {
-          this.schedule.frequency = jobs[0].frequency;
-        }
-      }
-    },
-    saveSchedule: function saveSchedule() {
-      var _this$schedule3 = this.schedule,
-          project = _this$schedule3.project,
-          category = _this$schedule3.category,
-          method = _this$schedule3.method;
       var scheduler = this.scheduler.filter(function (schedule) {
         return schedule.project !== project || schedule.category !== category || schedule.method !== method;
       });
       scheduler.push(this.schedule);
       this.$emit('save', scheduler);
+    },
+    handleSelectProject: function handleSelectProject(project) {
+      if (this.schedule.project !== project) {
+        this.handleSelectCategory(null);
+      }
+
+      this.schedule.project = project;
+    },
+    handleSelectCategory: function handleSelectCategory(category) {
+      if (this.schedule.category !== category) {
+        this.schedule.method = null;
+      }
+
+      this.schedule.category = category;
+    },
+    handleSelectMethod: function handleSelectMethod(method) {
+      var _this$schedule3 = this.schedule,
+          project = _this$schedule3.project,
+          category = _this$schedule3.category;
+
+      if (method !== null) {
+        var found = this.scheduler.find(function (schedule) {
+          return schedule.category === category && schedule.project === project && schedule.method === method;
+        });
+        this.schedule.frequency = found ? found.frequency : this.defaultFrequency;
+      }
+
+      this.schedule.method = method;
     }
   }
 });
@@ -3883,6 +3896,9 @@ __webpack_require__.r(__webpack_exports__);
   watch: {
     selected: function selected(value) {
       this.$emit('input', value);
+    },
+    value: function value(_value) {
+      this.selected = _value;
     }
   }
 });
@@ -81071,7 +81087,8 @@ var render = function() {
                     }
                   })
                 ]
-              )
+              ),
+              _vm._v("\n\n                Retry Failed Jobs\n            ")
             ]
           )
         ]
@@ -84736,16 +84753,15 @@ var render = function() {
                     [
                       _c("CustomSelect", {
                         attrs: {
+                          value: _vm.schedule.project,
                           disabled: _vm.projects === null,
                           options: _vm.projects,
                           label: "Project"
                         },
-                        model: {
-                          value: _vm.schedule.project,
-                          callback: function($$v) {
-                            _vm.$set(_vm.schedule, "project", $$v)
-                          },
-                          expression: "schedule.project"
+                        on: {
+                          input: function($event) {
+                            return _vm.handleSelectProject($event)
+                          }
                         }
                       })
                     ],
@@ -84758,16 +84774,15 @@ var render = function() {
                     [
                       _c("CustomSelect", {
                         attrs: {
+                          value: _vm.schedule.category,
                           disabled: _vm.schedule.project === null,
                           options: _vm.projects[_vm.schedule.project],
                           label: "Category"
                         },
-                        model: {
-                          value: _vm.schedule.category,
-                          callback: function($$v) {
-                            _vm.$set(_vm.schedule, "category", $$v)
-                          },
-                          expression: "schedule.category"
+                        on: {
+                          input: function($event) {
+                            return _vm.handleSelectCategory($event)
+                          }
                         }
                       })
                     ],
@@ -84782,21 +84797,15 @@ var render = function() {
                     [
                       _c("CustomSelect", {
                         attrs: {
+                          value: _vm.schedule.method,
                           disabled: _vm.methods.length === 0,
                           options: _vm.methods,
                           label: "Method"
                         },
                         on: {
                           input: function($event) {
-                            return _vm.handleSeletecMethod()
+                            return _vm.handleSelectMethod($event)
                           }
-                        },
-                        model: {
-                          value: _vm.schedule.method,
-                          callback: function($$v) {
-                            _vm.$set(_vm.schedule, "method", $$v)
-                          },
-                          expression: "schedule.method"
                         }
                       })
                     ],
@@ -84804,7 +84813,7 @@ var render = function() {
                   )
                 ]),
                 _vm._v(" "),
-                _vm.schedule.method
+                _vm.schedule.method !== null
                   ? _c("div", { staticClass: "row pb-3" }, [
                       _c(
                         "div",

@@ -23,11 +23,12 @@
             show(value) {
                 this.schedule = value ? this.getSelectedValues() : null;
                 $('#createEditSchedule').modal(value ? 'show' : 'hide');
-            }
+            },
         },
         data () {
             return {
                 projects: JSON.parse(JSON.stringify(Horizon.methodsForScheduling)),
+                defaultFrequency: '*\/1 * * * *',
                 schedule: null
             };
         },
@@ -51,25 +52,10 @@
                 }
 
                 return {
-                    frequency: '*\/1 * * * *',
+                    frequency: this.defaultFrequency,
                     category: null,
                     project: null,
                     method: null,
-                }
-            },
-            handleSeletecMethod() {
-                const { project, category, method } = this.schedule;
-
-                if (method !== null) {
-                    const jobs = this.scheduler.filter(schedule => (
-                        schedule.category === category &&
-                        schedule.project === project && 
-                        schedule.method === method
-                    ));
-
-                    if (jobs.length > 0) {
-                        this.schedule.frequency = jobs[0].frequency;
-                    }
                 }
             },
             saveSchedule() {
@@ -82,6 +68,35 @@
                 scheduler.push(this.schedule);
 
                 this.$emit('save', scheduler);
+            },
+            handleSelectProject(project) {
+                if (this.schedule.project !== project) {
+                    this.handleSelectCategory(null);
+                }
+
+                this.schedule.project = project;
+            },
+            handleSelectCategory(category) {
+                if (this.schedule.category !== category) {
+                    this.schedule.method = null;
+                }
+
+                this.schedule.category = category;
+            },
+            handleSelectMethod(method) {
+                const { project, category } = this.schedule;
+
+                if (method !== null) {
+                    const found = this.scheduler.find(schedule => (
+                        schedule.category === category &&
+                        schedule.project === project && 
+                        schedule.method === method
+                    ));
+                    
+                    this.schedule.frequency = found ? found.frequency : this.defaultFrequency;
+                }
+
+                this.schedule.method = method;
             }
         }
     }
@@ -100,34 +115,36 @@
                     <div class="row pb-3">
                         <div class="col-6">
                             <CustomSelect
-                                v-model="schedule.project"
+                                :value="schedule.project"
                                 :disabled="projects === null"
                                 :options="projects"
                                 label="Project"
+                                @input="handleSelectProject($event)"
                             />
                         </div>
                         <div class="col-6">
                             <CustomSelect
-                                v-model="schedule.category"
+                                :value="schedule.category"
                                 :disabled="schedule.project === null"
                                 :options="projects[schedule.project]"
                                 label="Category"
+                                @input="handleSelectCategory($event)"
                             />
                         </div>
                     </div>
                     <div class="row pb-3">
                         <div class="col">
                             <CustomSelect
-                                v-model="schedule.method"
+                                :value="schedule.method"
                                 :disabled="methods.length === 0"
                                 :options="methods"
                                 label="Method"
-                                @input="handleSeletecMethod()"
+                                @input="handleSelectMethod($event)"
                             />
                         </div>
                     </div>
                     <div
-                        v-if="schedule.method"
+                        v-if="schedule.method !== null"
                         class="row pb-3"
                     >   
                         <div class="col">
