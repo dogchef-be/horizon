@@ -115,8 +115,7 @@
                     <div class="row pb-3">
                         <div class="col-6">
                             <CustomSelect
-                                :value="schedule.project"
-                                :disabled="projects === null"
+                                :value="schedule.project"                                
                                 :options="projects"
                                 label="Project"
                                 @input="handleSelectProject($event)"
@@ -125,7 +124,7 @@
                         <div class="col-6">
                             <CustomSelect
                                 :value="schedule.category"
-                                :disabled="schedule.project === null"
+                                :disabled="!schedule.project"
                                 :options="projects[schedule.project]"
                                 label="Category"
                                 @input="handleSelectCategory($event)"
@@ -164,14 +163,16 @@
                         type="button"
                         @click="$emit('close')"
                     >
-                        <span>Close</span>
+                        Close
                     </button>
                     <button
-                        :disabled="schedule.frequency === null"
+                        :disabled="!schedule.project || !schedule.category || !schedule.method || !schedule.frequency"
                         class="btn btn-primary"
                         type="button"
                         @click="saveSchedule()"
-                    >Save</button>
+                    >
+                        Save
+                    </button>
                 </div>
             </div>
         </div>
