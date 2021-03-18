@@ -78,8 +78,8 @@
                 this.showDelete = show;
             },
             handleCreate() {
-                this.closeCollapse();
                 this.clearSelectedKeys();
+                this.closeCollapse();
                 this.showEditCreateModal();
             },
             handleEdit(schedule) {
@@ -110,11 +110,11 @@
             selectProject({ tag, value }) {
                 this.clearSelectedKeys(Object.keys(this.selected).filter(k => k !== 'project'));
                 this.selected.project = this.selected.project === value ? null : value;
-                this.tag = this.tag === tag ? null : tag;
+                this.tag = tag;
             },
             closeCollapse() {
                 if (this.tag !== null) {
-                    $(this.tag).collapse('hide');
+                    $(`#${this.tag}`).collapse('hide');
                     this.tag = null;
                 }
             },

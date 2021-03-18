@@ -4080,8 +4080,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       this.showDelete = show;
     },
     handleCreate: function handleCreate() {
-      this.closeCollapse();
       this.clearSelectedKeys();
+      this.closeCollapse();
       this.showEditCreateModal();
     },
     handleEdit: function handleEdit(schedule) {
@@ -4121,11 +4121,11 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         return k !== 'project';
       }));
       this.selected.project = this.selected.project === value ? null : value;
-      this.tag = this.tag === tag ? null : tag;
+      this.tag = tag;
     },
     closeCollapse: function closeCollapse() {
       if (this.tag !== null) {
-        $(this.tag).collapse('hide');
+        $("#".concat(this.tag)).collapse('hide');
         this.tag = null;
       }
     },
