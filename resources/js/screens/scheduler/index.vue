@@ -182,7 +182,7 @@
                     tag="schedule"
                     @change="selectProject($event)"
                 >
-                    <template #default="{ tag, item }">
+                    <template #default="{ item }">
                         <div 
                             v-if="showTable(item)"
                             class="table-responsive-lg"
@@ -198,7 +198,7 @@
                                 <tbody>
                                     <tr
                                         v-for="(schedule, index) in schedules"
-                                        :key="`${tag}_job_${index}`"
+                                        :key="`${item}_schedule_index_${index}`"
                                     >
                                         <td>
                                             <strong class="text-wrapper">{{ schedule.category }}</strong>

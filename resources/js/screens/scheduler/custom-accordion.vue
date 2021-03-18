@@ -48,7 +48,7 @@
                 :class="`collapse`"
             >
                 <div class="card-body">
-                    <slot :tag="`${tag}-${item}`" :item="item" name="default"></slot>
+                    <slot :item="item" name="default"></slot>
                 </div>
             </div>
         </div>
