@@ -35,7 +35,7 @@
                         data-toggle="collapse"
                         aria-expanded="false"
                         type="button"
-                        @click="$emit('change', { tag: `collapse-${tag}-${item}`, value: item })"
+                        @click="$emit('change', { tag: `collapse-${tag}-${item}`, value:item })"
                     >
                         {{ item }}
                     </button>
@@ -45,10 +45,10 @@
                 :id="`collapse-${tag}-${item}`"
                 :aria-labelledby="`heading-${tag}-${item}`"
                 :data-parent="`#accordion-${tag}`"
-                :class="`collapse collapse-${tag}`"
+                :class="`collapse`"
             >
                 <div class="card-body">
-                    <slot v-bind:tag="`${tag}-${item}`" name="default"></slot>
+                    <slot :tag="`${tag}-${item}`" :item="item" name="default"></slot>
                 </div>
             </div>
         </div>

@@ -25,7 +25,8 @@
                 },
                 showEditCreate: false,
                 showDelete: false,
-                loaded: false
+                loaded: false,
+                tag: null,
             };
         },
         computed: {
@@ -34,23 +35,26 @@
                     return [];
                 }
 
-                return [...new Set(this.scheduler.map(item => item.project))].sort((a, b) => this.sortArray(a, b));
+                const projects = [...new Set(this.scheduler.map(item => item.project))];
+
+                return projects.sort((a, b) => this.sortAlphabetically(a, b));
             },
-            categories() {
+            schedules() {
                 const { project } = this.selected;
 
                 if (project === null) { return []; }
-
-                const filtered = this.scheduler.filter(item => item.project === project);
-
-                return [...new Set(filtered.map(item => item.category))].sort((a, b) => this.sortArray(a, b));
-            },
-            schedules() {
-                const { project, category } = this.selected;
-
-                if (project === null || category === null) { return []; }
                 
-                return this.scheduler.filter(schedule => schedule.project === project && schedule.category === category);
+                const jobs = this.scheduler.filter(schedule => schedule.project === project);
+
+                return jobs.sort((a, b) => {
+                    const sort = this.sortAlphabetically(a.category, b.category);
+                    
+                    if (sort !== 0) {
+                        return sort;
+                    }
+
+                    return this.sortAlphabetically(a.method, b.method);
+                });
             }
         },
         created() {
@@ -64,16 +68,8 @@
             document.title = "Horizon - Scheduler";
         },
         methods: {
-            sortArray(a, b) {
-                if (a > b) {
-                    return -1;
-                }
-
-                if (a < b) {
-                    return 1;
-                }
-
-                return 0;
+            sortAlphabetically(a, b) {
+                return a.localeCompare(b, 'en', { sensitivity: 'base' });
             },
             showEditCreateModal(show = true) {
                 this.showEditCreate = show;
@@ -82,21 +78,21 @@
                 this.showDelete = show;
             },
             handleCreate() {
-                this.closeProjectCollapse();
+                this.closeCollapse();
                 this.clearSelectedKeys();
                 this.showEditCreateModal();
             },
             handleEdit(schedule) {
-                this.closeProjectCollapse();
+                this.closeCollapse();
                 this.selected = { ...schedule };
                 this.showEditCreateModal();
             },
             handleDelete(schedule) {
-                this.closeProjectCollapse();
+                this.closeCollapse();
                 this.selected = { ...schedule }
                 this.showDeleteModal();
             },
-            saveScheduler(scheduler = this.scheduler, deleted = null) {
+            saveScheduler(scheduler = this.scheduler) {
                 this.showEditCreateModal(false);
                 this.showDeleteModal(false);
                 this.loading();
@@ -111,22 +107,15 @@
             parseScheduler(scheduler) {
                 this.scheduler = scheduler === '' ? [] : scheduler;
             },
-            select(key, collapse) {
-                this.clearSelectedKeys(Object.keys(this.selected).filter(k => k !== key && k !== 'project'));
-
-                if (key === 'project'){
-                    this.closeCategoriesCollapse()
-                }
-
-                this.selected[key] = this.selected[key] === collapse.value ? null : collapse.value;
+            selectProject({ tag, value }) {
+                this.clearSelectedKeys(Object.keys(this.selected).filter(k => k !== 'project'));
+                this.selected.project = this.selected.project === value ? null : value;
+                this.tag = this.tag === tag ? null : tag;
             },
-            closeProjectCollapse(action = 'hide') {
-                this.closeCategoriesCollapse(action);
-                $(`.collapse-schedule`).collapse(action);
-            },
-            closeCategoriesCollapse(action = 'hide') {
-                if (this.selected.project !== null) {
-                    $(`.collapse-schedule-${this.selected.project}`).collapse(action);
+            closeCollapse() {
+                if (this.tag !== null) {
+                    $(this.tag).collapse('hide');
+                    this.tag = null;
                 }
             },
             clearSelectedKeys(keys = null) {
@@ -144,6 +133,11 @@
                 return (new VueCronEditorClass({
                     propsData: { value: frequency }
                 })).explanation;
+            },
+            showTable(item) {
+                return this.schedules.length > 0 &&
+                    this.selected.project !== null &&
+                    this.selected.project === item
             },
             loading(loading = true) {
                 this.loaded = !loading;
@@ -186,37 +180,49 @@
                 <CustomAccordion
                     :items="projects"
                     tag="schedule"
-                    @change="select('project', $event)"
+                    @change="selectProject($event)"
                 >
-                    <template #default="{ tag }">
-                        <CustomAccordion
-                            :items="categories"
-                            :tag="tag"
-                            @change="select('category', $event)"
+                    <template #default="{ tag, item }">
+                        <div 
+                            v-if="showTable(item)"
+                            class="table-responsive-lg"
                         >
-                            <div
-                                v-for="schedule in schedules"
-                                :key="`${schedule.project}_${schedule.category}_${schedule.method}`"
-                                class="row method-row"
-                            >
-                                <div class="col-5 d-flex align-items-center">{{ schedule.method }}</div>
-                                <div class="col-5 d-flex align-items-center">{{ explanation(schedule.frequency) }}</div>
-                                <div class="col-2 d-flex justify-content-end">
-                                    <button
-                                        class="btn btn-secondary btn-sm mr-1"
-                                        @click="handleEdit(schedule)"
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Job</th>
+                                        <th scope="col">Frequency</th>
+                                        <th scope="col">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr
+                                        v-for="(schedule, index) in schedules"
+                                        :key="`${tag}_job_${index}`"
                                     >
-                                        <i class="bi bi-pencil-fill"></i>
-                                    </button>
-                                    <button
-                                        class="btn btn-danger btn-sm"
-                                        @click="handleDelete(schedule)"
-                                    >
-                                        <i class="bi bi-trash-fill"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </CustomAccordion>
+                                        <td>
+                                            <strong class="text-wrapper">{{ schedule.category }}</strong>
+                                            <span class="text-wrapper">{{ schedule.method }}</span>
+                                        </td>
+                                        <td>{{ explanation(schedule.frequency) }}</td>
+                                        <td>
+                                            <button
+                                                class="btn btn-secondary btn-sm mr-1"
+                                                @click="handleEdit(schedule)"
+                                            >
+                                                <i class="bi bi-pencil-fill"></i>
+                                            </button>
+                                            <button
+                                                class="btn btn-danger btn-sm"
+                                                @click="handleDelete(schedule)"
+                                            >
+                                                <i class="bi bi-trash-fill"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </template>
                 </CustomAccordion>
             </div>
@@ -224,11 +230,24 @@
     </div>
 </template>
 <style lang="scss" scoped>
-.method-row {
-    margin: 0 -10px;
-
-    &:not(:last-child) {
-        padding-bottom: 15px;
+.table {
+    th {
+        border-bottom: 2px solid rgba(0, 0, 0, 0.125);
+        background-color: transparent;
+        padding: 0.75rem 1.25rem;
+        border-top: none;
+        font-weight: bold;
     }
+}
+
+.text-wrapper {
+    padding: 2px 8px;
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+::v-deep .accordion .card-body {
+    padding: 0;
 }
 </style>
