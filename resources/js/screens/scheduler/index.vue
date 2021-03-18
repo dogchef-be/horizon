@@ -110,7 +110,7 @@
             selectProject({ tag, value }) {
                 this.clearSelectedKeys(Object.keys(this.selected).filter(k => k !== 'project'));
                 this.selected.project = this.selected.project === value ? null : value;
-                this.tag = tag;
+                this.tag = this.tag === tag ? null : tag;
             },
             closeCollapse() {
                 if (this.tag !== null) {

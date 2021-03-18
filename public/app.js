@@ -4121,7 +4121,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         return k !== 'project';
       }));
       this.selected.project = this.selected.project === value ? null : value;
-      this.tag = tag;
+      this.tag = this.tag === tag ? null : tag;
     },
     closeCollapse: function closeCollapse() {
       if (this.tag !== null) {
