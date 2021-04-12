@@ -3,6 +3,7 @@
 namespace Laravel\Horizon\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Laravel\Horizon\Jobs\RetryFailedJob;
 use Laravel\Horizon\Contracts\JobRepository;
 use Laravel\Horizon\Contracts\TagRepository;
 
@@ -103,6 +104,31 @@ class FailedJobsController extends Controller
         return (array) $this->jobs->getJobs([$id])->map(function ($job) {
             return $this->decode($job);
         })->first();
+    }
+
+    /**
+     * Retry a failed job.
+     *
+     * @param  string  $id
+     * @return void
+     */
+    public function retry($id)
+    {
+        dispatch(new RetryFailedJob($id));
+    }
+
+    /**
+     * Retry all failed jobs that haven't been retried
+     * 
+     * @return void
+     */
+    public function retryAll () {
+        $jobs = $this->jobs->getFailed();
+        foreach ($jobs as $job) {
+            if (empty($job->retried_by)) {
+                dispatch(new RetryFailedJob($job->id));
+            }
+        } 
     }
 
     /**

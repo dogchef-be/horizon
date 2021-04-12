@@ -37,7 +37,8 @@ Route::prefix('api')->group(function () {
     Route::get('/jobs/failed', 'FailedJobsController@index')->name('horizon.failed-jobs.index');
     Route::get('/jobs/failed/{id}', 'FailedJobsController@show')->name('horizon.failed-jobs.show');
     Route::delete('/jobs/failed/{id}', 'FailedJobsController@delete')->name('horizon.failed-jobs.delete');
-    Route::post('/jobs/retry/{id}', 'RetryController@store')->name('horizon.retry-jobs.show');
+    Route::post('/jobs/retry/{id}', 'FailedJobsController@retry')->name('horizon.failed-jobs.retry');
+    Route::get('/jobs/retry-all', 'FailedJobsController@retryAll')->name('horizon.failed-jobs.retry-all');
     Route::get('/jobs/{id}', 'JobsController@show')->name('horizon.jobs.show');
 
     // Scheduler file 

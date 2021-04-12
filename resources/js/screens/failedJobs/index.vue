@@ -23,7 +23,8 @@
                 jobs: [],
                 retryingJobs: [],
                 showDelete: false,
-                selected: {}
+                selected: {},
+                retryingAll: false
             };
         },
 
@@ -107,6 +108,20 @@
                 this.hasNewEntries = false;
             },
 
+            /**
+             * Retry all the failed jobs
+             */
+            retryAll(){
+                this.retryingAll = true;
+                
+                this.$http.get(Horizon.basePath + '/api/jobs/retry-all')
+                    .then((response) => {
+                        setTimeout(() => {
+                            this.retryingAll = false;
+                        }, 5000);
+                    }).catch(error => {
+                    });
+            },
 
             /**
              * Retry the given failed job.
@@ -239,7 +254,16 @@
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h5>Failed Jobs</h5>
 
-                <input type="text" class="form-control" v-model="tagSearchPhrase" placeholder="Search Tags" style="width:200px">
+                <div class="d-flex">
+                    <button class="btn btn-outline-primary" v-on:click.prevent="retryAll()" :disabled="retryingAll">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="icon fill-primary" :class="{spin: retryingAll}">
+                            <path d="M10 3v2a5 5 0 0 0-3.54 8.54l-1.41 1.41A7 7 0 0 1 10 3zm4.95 2.05A7 7 0 0 1 10 17v-2a5 5 0 0 0 3.54-8.54l1.41-1.41zM10 20l-4-4 4-4v8zm0-12V0l4 4-4 4z"/>
+                        </svg>
+                        Retry Failed Jobs
+                    </button>
+
+                    <input type="text" class="form-control ml-2" v-model="tagSearchPhrase" placeholder="Search Tags" style="width:200px">
+                </div>
             </div>
 
             <div v-if="!ready" class="d-flex align-items-center justify-content-center card-bg-secondary p-5 bottom-radius">
