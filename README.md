@@ -11,6 +11,8 @@
 
 As Horizon's users we noticed some missing nice-to-have features. This fork has been created to provide those features:
  - Job scheduler
+ - Retry all failed jobs
+ - Remove failed jobs
  
 **How to use:** You should fork this repository as we didn't publish it in Packagist, then include it in `composer.json`.
 
