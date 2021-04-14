@@ -2,6 +2,7 @@
 
 namespace Laravel\Horizon\Http\Controllers;
 
+use Illuminate\Http\Request;
 use Laravel\Horizon\Contracts\JobRepository;
 
 class JobsController extends Controller
@@ -37,6 +38,23 @@ class JobsController extends Controller
         return (array) $this->jobs->getJobs([$id])->map(function ($job) {
             return $this->decode($job);
         })->first();
+    }
+
+    /**
+     * Execute a job
+     *
+     * @param  object  $job
+     * @return array
+     */
+    public function execute(Request $request)
+    {
+        $job = $request->input('job');
+        
+        //dispatch(new );
+
+        $method = "App\\JobScheduler\\{$job['project']}\\{$job['category']}::{$job['method']}";
+
+        $method();
     }
 
     /**

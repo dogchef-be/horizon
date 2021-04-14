@@ -40,6 +40,7 @@ Route::prefix('api')->group(function () {
     Route::post('/jobs/retry/{id}', 'FailedJobsController@retry')->name('horizon.failed-jobs.retry');
     Route::get('/jobs/retry-all', 'FailedJobsController@retryAll')->name('horizon.failed-jobs.retry-all');
     Route::get('/jobs/{id}', 'JobsController@show')->name('horizon.jobs.show');
+    Route::post('/jobs/execute', 'JobsController@execute')->name('horizon.jobs.execute');
 
     // Scheduler file 
     Route::get('/scheduler', 'SchedulerFileController@index')->name('horizon.scheduler.index');

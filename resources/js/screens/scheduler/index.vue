@@ -1,149 +1,172 @@
 <script>
-    import Vue from 'vue'
-    import VueCronEditorBuefy from 'vue-cron-editor-buefy';
+import Vue from "vue";
+import VueCronEditorBuefy from "vue-cron-editor-buefy";
 
-    // Custom Components
-    import CreateEditSchedule from './create-edit-schedule';
-    import CustomAccordion from './custom-accordion';
-    import DeleteSchedule from './delete-schedule';
-    import CustomSelect from './custom-select';
+// Custom Components
+import CreateEditSchedule from "./create-edit-schedule";
+import CustomAccordion from "./custom-accordion";
+import DeleteSchedule from "./delete-schedule";
+import CustomSelect from "./custom-select";
+import ExecuteJob from "./execute-job";
 
-    export default {
-        components: {
-            CreateEditSchedule,
-            CustomAccordion,
-            DeleteSchedule,
-            CustomSelect
+export default {
+    components: {
+        CreateEditSchedule,
+        CustomAccordion,
+        DeleteSchedule,
+        CustomSelect,
+        ExecuteJob
+    },
+    data() {
+        return {
+            scheduler: [],
+            selected: {
+                method: null,
+                project: null,
+                category: null
+            },
+            showEditCreate: false,
+            showDelete: false,
+            showExecuteJob: false,
+            loaded: false,
+            tag: null
+        };
+    },
+    computed: {
+        projects() {
+            if (this.scheduler.length === 0) {
+                return [];
+            }
+
+            const projects = [
+                ...new Set(this.scheduler.map(item => item.project))
+            ];
+
+            return projects.sort((a, b) => this.sortAlphabetically(a, b));
         },
-        data() {
-            return {
-                scheduler: [],
-                selected: {
-                    method: null,
-                    project: null,
-                    category: null
-                },
-                showEditCreate: false,
-                showDelete: false,
-                loaded: false,
-                tag: null,
-            };
-        },
-        computed: {
-            projects() {
-                if (this.scheduler.length === 0) {
-                    return [];
+        schedules() {
+            const { project } = this.selected;
+
+            if (project === null) {
+                return [];
+            }
+
+            const jobs = this.scheduler.filter(
+                schedule => schedule.project === project
+            );
+
+            return jobs.sort((a, b) => {
+                const sort = this.sortAlphabetically(a.category, b.category);
+
+                if (sort !== 0) {
+                    return sort;
                 }
 
-                const projects = [...new Set(this.scheduler.map(item => item.project))];
-
-                return projects.sort((a, b) => this.sortAlphabetically(a, b));
-            },
-            schedules() {
-                const { project } = this.selected;
-
-                if (project === null) { return []; }
-                
-                const jobs = this.scheduler.filter(schedule => schedule.project === project);
-
-                return jobs.sort((a, b) => {
-                    const sort = this.sortAlphabetically(a.category, b.category);
-                    
-                    if (sort !== 0) {
-                        return sort;
-                    }
-
-                    return this.sortAlphabetically(a.method, b.method);
-                });
-            }
+                return this.sortAlphabetically(a.method, b.method);
+            });
+        }
+    },
+    created() {
+        this.$http.get(Horizon.basePath + "/api/scheduler").then(response => {
+            this.parseScheduler(response.data);
+            this.loading(false);
+        });
+    },
+    mounted() {
+        document.title = "Horizon - Scheduler";
+    },
+    methods: {
+        sortAlphabetically(a, b) {
+            return a.localeCompare(b, "en", { sensitivity: "base" });
         },
-        created() {
-            this.$http.get(Horizon.basePath + '/api/scheduler')
+        showEditCreateModal(show = true) {
+            this.showEditCreate = show;
+        },
+        showDeleteModal(show = true) {
+            this.showDelete = show;
+        },
+        handleCreate() {
+            this.clearSelectedKeys();
+            this.closeCollapse();
+            this.showEditCreateModal();
+        },
+        handleEdit(schedule) {
+            this.closeCollapse();
+            this.selected = { ...schedule };
+            this.showEditCreateModal();
+        },
+        handleDelete(schedule) {
+            this.closeCollapse();
+            this.selected = { ...schedule };
+            this.showDeleteModal();
+        },
+        saveScheduler(scheduler = this.scheduler) {
+            this.showEditCreateModal(false);
+            this.showDeleteModal(false);
+            this.loading();
+
+            this.$http
+                .post(Horizon.basePath + "/api/scheduler", { scheduler })
                 .then(response => {
                     this.parseScheduler(response.data);
+                    this.clearSelectedKeys();
                     this.loading(false);
                 });
         },
-        mounted() {
-            document.title = "Horizon - Scheduler";
+        executeJob(job) {
+            this.showExecuteJob = false;
+
+            this.$http
+                .post(Horizon.basePath + "/api/jobs/execute", { job })
+                .then(response => {
+                    alert("Job has been dispatched to the queue");
+                });
         },
-        methods: {
-            sortAlphabetically(a, b) {
-                return a.localeCompare(b, 'en', { sensitivity: 'base' });
-            },
-            showEditCreateModal(show = true) {
-                this.showEditCreate = show;
-            },
-            showDeleteModal(show = true) {
-                this.showDelete = show;
-            },
-            handleCreate() {
-                this.clearSelectedKeys();
-                this.closeCollapse();
-                this.showEditCreateModal();
-            },
-            handleEdit(schedule) {
-                this.closeCollapse();
-                this.selected = { ...schedule };
-                this.showEditCreateModal();
-            },
-            handleDelete(schedule) {
-                this.closeCollapse();
-                this.selected = { ...schedule }
-                this.showDeleteModal();
-            },
-            saveScheduler(scheduler = this.scheduler) {
-                this.showEditCreateModal(false);
-                this.showDeleteModal(false);
-                this.loading();
-
-                this.$http.post(Horizon.basePath + '/api/scheduler', { scheduler })
-                    .then(response =>{
-                        this.parseScheduler(response.data);
-                        this.clearSelectedKeys();
-                        this.loading(false);
-                    });
-            },
-            parseScheduler(scheduler) {
-                this.scheduler = scheduler === '' ? [] : scheduler;
-            },
-            selectProject({ tag, value }) {
-                this.clearSelectedKeys(Object.keys(this.selected).filter(k => k !== 'project'));
-                this.selected.project = this.selected.project === value ? null : value;
-                this.tag = this.tag === tag ? null : tag;
-            },
-            closeCollapse() {
-                if (this.tag !== null) {
-                    $(`#${this.tag}`).collapse('hide');
-                    this.tag = null;
-                }
-            },
-            clearSelectedKeys(keys = null) {
-                if (keys === null) {
-                    keys = Object.keys(this.selected);
-                }
-
-                keys.forEach(key => this.selected[key] = null);
-            },
-            explanation(frequency) {
-                if (frequency === null) return '';
-
-                const VueCronEditorClass = Vue.extend(VueCronEditorBuefy);
-
-                return (new VueCronEditorClass({
-                    propsData: { value: frequency }
-                })).explanation;
-            },
-            showTable(item) {
-                return this.schedules.length > 0 &&
-                    this.selected.project !== null &&
-                    this.selected.project === item
-            },
-            loading(loading = true) {
-                this.loaded = !loading;
+        parseScheduler(scheduler) {
+            this.scheduler = scheduler === "" ? [] : scheduler;
+        },
+        selectProject({ tag, value }) {
+            this.clearSelectedKeys(
+                Object.keys(this.selected).filter(k => k !== "project")
+            );
+            this.selected.project =
+                this.selected.project === value ? null : value;
+            this.tag = this.tag === tag ? null : tag;
+        },
+        closeCollapse() {
+            if (this.tag !== null) {
+                $(`#${this.tag}`).collapse("hide");
+                this.tag = null;
             }
+        },
+        clearSelectedKeys(keys = null) {
+            if (keys === null) {
+                keys = Object.keys(this.selected);
+            }
+
+            keys.forEach(key => (this.selected[key] = null));
+        },
+        explanation(frequency) {
+            if (frequency === null) return "";
+
+            const VueCronEditorClass = Vue.extend(VueCronEditorBuefy);
+
+            return new VueCronEditorClass({
+                propsData: { value: frequency }
+            }).explanation;
+        },
+        showTable(item) {
+            return (
+                this.schedules.length > 0 &&
+                this.selected.project !== null &&
+                this.selected.project === item
+            );
+        },
+        loading(loading = true) {
+            this.loaded = !loading;
         }
     }
+};
 </script>
 <template>
     <div>
@@ -154,6 +177,13 @@
             @save="saveScheduler($event)"
             @close="showEditCreate = false"
         />
+        <ExecuteJob
+            :show="showExecuteJob"
+            :job="scheduler"
+            :selected="selected"
+            @run="executeJob($event)"
+            @close="showExecuteJob = false"
+        />
         <DeleteSchedule
             :show="showDelete"
             :scheduler="scheduler"
@@ -162,15 +192,30 @@
             @save="saveScheduler($event)"
         />
         <div class="card">
-            <div class="card-header d-flex align-items-center justify-content-between">
+            <div
+                class="card-header d-flex align-items-center justify-content-between"
+            >
                 <h5>Scheduler</h5>
-                
-                <button type="button" class="btn btn-primary" @click="handleCreate()">
-                    <i class="bi bi-plus-circle"></i>
-                </button>
+
+                <div class="d-flex">
+                    <button
+                        type="button"
+                        class="btn btn-primary"
+                        @click="showExecuteJob = true"
+                    >
+                        <i class="bi bi-caret-right-square"></i>
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-primary ml-2"
+                        @click="handleCreate()"
+                    >
+                        <i class="bi bi-plus-circle"></i>
+                    </button>
+                </div>
             </div>
-            <div 
-                v-if="scheduler.length === 0 || !loaded" 
+            <div
+                v-if="scheduler.length === 0 || !loaded"
                 class="d-flex flex-column align-items-center justify-content-center card-bg-secondary p-5 bottom-radius"
             >
                 <span v-if="!loaded">Loading schedules...</span>
@@ -183,10 +228,7 @@
                     @change="selectProject($event)"
                 >
                     <template #default="{ item }">
-                        <div 
-                            v-if="showTable(item)"
-                            class="table-responsive-lg"
-                        >
+                        <div v-if="showTable(item)" class="table-responsive-lg">
                             <table class="table">
                                 <thead>
                                     <tr>
@@ -201,16 +243,26 @@
                                         :key="`${item}_schedule_index_${index}`"
                                     >
                                         <td>
-                                            <strong class="text-wrapper">{{ schedule.category }}</strong>
-                                            <span class="text-wrapper">{{ schedule.method }}</span>
+                                            <strong class="text-wrapper">{{
+                                                schedule.category
+                                            }}</strong>
+                                            <span class="text-wrapper">{{
+                                                schedule.method
+                                            }}</span>
                                         </td>
-                                        <td>{{ explanation(schedule.frequency) }}</td>
+                                        <td>
+                                            {{
+                                                explanation(schedule.frequency)
+                                            }}
+                                        </td>
                                         <td>
                                             <button
                                                 class="btn btn-secondary btn-sm mr-1"
                                                 @click="handleEdit(schedule)"
                                             >
-                                                <i class="bi bi-pencil-fill"></i>
+                                                <i
+                                                    class="bi bi-pencil-fill"
+                                                ></i>
                                             </button>
                                             <button
                                                 class="btn btn-danger btn-sm"
