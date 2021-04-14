@@ -83,7 +83,9 @@ class FailedJobsController extends Controller
     protected function paginateByTag(Request $request, $tag)
     {
         $jobIds = $this->tags->paginate(
-            'failed:'.$tag, ($request->query('starting_at') ?: -1) + 1, 50
+            'failed:'.$tag,
+            ($request->query('starting_at') ?: -1) + 1,
+            50
         );
 
         $startingAt = $request->query('starting_at', 0);
@@ -118,17 +120,18 @@ class FailedJobsController extends Controller
     }
 
     /**
-     * Retry all failed jobs that haven't been retried
-     * 
+     * Retry all failed jobs that haven't been retried.
+     *
      * @return void
      */
-    public function retryAll () {
+    public function retryAll()
+    {
         $jobs = $this->jobs->getFailed();
         foreach ($jobs as $job) {
             if (empty($job->retried_by)) {
-                dispatch(new RetryFailedJob($job->id));
+                $this->retry($job->id);
             }
-        } 
+        }
     }
 
     /**
