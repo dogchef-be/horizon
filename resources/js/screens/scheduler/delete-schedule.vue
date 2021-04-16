@@ -33,16 +33,17 @@
 </script>
 <template>
     <div class="modal fade" id="deleteSchedule" tabindex="-1" data-backdrop="static" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xs">
             <div class="modal-content" v-if="show">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Do you really want to delete this schedule?</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Are you sure?</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <span>{{ selected.project }} / {{ selected.category }} / {{ selected.method }}</span>
+                    <p><strong>Delete job from schedule:</strong></p>
+                    <p>{{ selected.project }} / {{ selected.category }} / {{ selected.method }}</p>
                 </div>
                 <div class="modal-footer">
                     <button 

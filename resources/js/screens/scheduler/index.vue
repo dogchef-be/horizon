@@ -243,32 +243,28 @@ export default {
                                         :key="`${item}_schedule_index_${index}`"
                                     >
                                         <td>
-                                            <strong class="text-wrapper">{{
-                                                schedule.category
-                                            }}</strong>
-                                            <span class="text-wrapper">{{
-                                                schedule.method
-                                            }}</span>
+                                            <strong class="text-wrapper">
+                                                {{ schedule.category }}
+                                            </strong>
+                                            <span class="text-wrapper">
+                                                {{ schedule.method }}
+                                            </span>
                                         </td>
                                         <td>
-                                            {{
-                                                explanation(schedule.frequency)
-                                            }}
+                                            {{ explanation(schedule.frequency) }}
                                         </td>
                                         <td>
                                             <button
                                                 class="btn btn-secondary btn-sm mr-1"
                                                 @click="handleEdit(schedule)"
                                             >
-                                                <i
-                                                    class="bi bi-pencil-fill"
-                                                ></i>
+                                                <i class="bi bi-pencil-fill" />
                                             </button>
                                             <button
                                                 class="btn btn-danger btn-sm"
                                                 @click="handleDelete(schedule)"
                                             >
-                                                <i class="bi bi-trash-fill"></i>
+                                                <i class="bi bi-trash-fill" />
                                             </button>
                                         </td>
                                     </tr>

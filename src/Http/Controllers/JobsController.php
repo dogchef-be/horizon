@@ -49,11 +49,8 @@ class JobsController extends Controller
     public function execute(Request $request)
     {
         $job = $request->input('job');
-        
-        //dispatch(new );
 
         $method = "App\\JobScheduler\\{$job['project']}\\{$job['category']}::{$job['method']}";
-
         $method();
     }
 
