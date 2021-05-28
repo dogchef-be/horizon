@@ -155,13 +155,6 @@ export default {
                 propsData: { value: frequency }
             }).explanation;
         },
-        showTable(item) {
-            return (
-                this.schedules.length > 0 &&
-                this.selected.project !== null &&
-                this.selected.project === item
-            );
-        },
         loading(loading = true) {
             this.loaded = !loading;
         }
@@ -228,7 +221,7 @@ export default {
                     @change="selectProject($event)"
                 >
                     <template #default="{ item }">
-                        <div v-if="showTable(item)" class="table-responsive-lg">
+                        <div v-show="selected.project === item" class="table-responsive-lg">
                             <table class="table">
                                 <thead>
                                     <tr>
@@ -243,12 +236,8 @@ export default {
                                         :key="`${item}_schedule_index_${index}`"
                                     >
                                         <td>
-                                            <strong class="text-wrapper">
-                                                {{ schedule.category }}
-                                            </strong>
-                                            <span class="text-wrapper">
-                                                {{ schedule.method }}
-                                            </span>
+                                            <span class="text-wrapper" v-text="schedule.category" />
+                                            <span class="text-wrapper" v-text="schedule.method" />
                                         </td>
                                         <td>
                                             {{ explanation(schedule.frequency) }}
@@ -290,6 +279,7 @@ export default {
 
 .text-wrapper {
     padding: 2px 8px;
+    margin: 0 2px;
     border-radius: 4px;
     background-color: rgba(0, 0, 0, 0.03);
     border: 1px solid rgba(0, 0, 0, 0.125);

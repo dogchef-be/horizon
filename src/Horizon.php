@@ -46,13 +46,6 @@ class Horizon
     public static $email;
 
     /**
-     * Indicates if Horizon should use the dark theme.
-     *
-     * @var bool
-     */
-    public static $useDarkTheme = false;
-
-    /**
      * The database configuration methods.
      *
      * @var array
@@ -108,18 +101,6 @@ class Horizon
                 'prefix' => config('horizon.prefix') ?: 'horizon:',
             ]),
         ])]);
-    }
-
-    /**
-     * Specifies that Horizon should use the dark theme.
-     *
-     * @return static
-     */
-    public static function night()
-    {
-        static::$useDarkTheme = true;
-
-        return new static;
     }
 
     /**
