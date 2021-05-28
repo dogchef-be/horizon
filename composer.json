@@ -1,7 +1,10 @@
 {
     "name": "dogchef-be/horizon",
     "description": "Dashboard and code-driven configuration for Laravel queues.",
-    "keywords": ["laravel", "queue"],
+    "keywords": [
+        "laravel",
+        "queue"
+    ],
     "license": "MIT",
     "authors": [
         {
@@ -45,9 +48,6 @@
         }
     },
     "extra": {
-        "branch-alias": {
-            "dev-master": "6.x-dev"
-        },
         "laravel": {
             "providers": [
                 "Laravel\\Horizon\\HorizonServiceProvider"
@@ -56,7 +56,7 @@
                 "Horizon": "Laravel\\Horizon\\Horizon"
             },
             "dont-discover": [
-              "barryvdh/laravel-ide-helper"
+                "barryvdh/laravel-ide-helper"
             ]
         }
     },
