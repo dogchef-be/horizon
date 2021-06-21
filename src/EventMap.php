@@ -27,6 +27,7 @@ trait EventMap
         Events\JobDeleted::class => [
             Listeners\MarkJobAsComplete::class,
             Listeners\UpdateJobMetrics::class,
+            Listeners\StoreTagsForCompletedJob::class,
         ],
 
         Events\JobsMigrated::class => [

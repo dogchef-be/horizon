@@ -3,9 +3,9 @@
 namespace Laravel\Horizon\Listeners;
 
 use Laravel\Horizon\Contracts\TagRepository;
-use Laravel\Horizon\Events\JobFailed;
+use Laravel\Horizon\Events\JobDeleted;
 
-class StoreTagsForFailedJob
+class StoreTagsForCompletedJob
 {
     /**
      * The tag repository implementation.
@@ -28,13 +28,13 @@ class StoreTagsForFailedJob
     /**
      * Handle the event.
      *
-     * @param  \Laravel\Horizon\Events\JobFailed  $event
+     * @param  \Laravel\Horizon\Events\JobDeleted  $event
      * @return void
      */
-    public function handle(JobFailed $event)
+    public function handle(JobDeleted $event)
     {
         $tags = collect($event->payload->tags())->map(function ($tag) {
-            return 'failed:'.$tag;
+            return 'completed:'.$tag;
         })->all();
 
         $this->tags->addTemporary(
